@@ -104,6 +104,27 @@ export function useRepoAdminActions(owner: string, repo: string) {
     });
   }
 
+  // PUT /admin/head replaces the stored HEAD; the DO re-resolves the oid from
+  // refs on the next read, so only the target needs to be sent. The endpoint
+  // replies with plain text ("OK"), not JSON, so check `response.ok` instead
+  // of parsing a body.
+  async function setDefaultBranch(target: string) {
+    await runAction("set-default-branch", async () => {
+      const response = await fetch(`/${owner}/${repo}/admin/head`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target }),
+      });
+      if (response.ok) {
+        window.location.reload();
+        return;
+      }
+
+      const message = (await response.text()).trim() || `HTTP ${response.status}`;
+      window.alert(`Error setting default branch: ${message}`);
+    });
+  }
+
   async function purgeRepo() {
     const confirmation = window.prompt(
       `This action will PERMANENTLY DELETE all repository data.\n\nTo confirm, type exactly: purge-${owner}/${repo}`
@@ -145,6 +166,7 @@ export function useRepoAdminActions(owner: string, repo: string) {
     removePack,
     checkOid,
     dumpState,
+    setDefaultBranch,
     purgeRepo,
   };
 }

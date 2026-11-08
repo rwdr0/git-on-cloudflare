@@ -10,6 +10,7 @@ import { useRepoAdminActions } from "./useRepoAdminActions";
 import { RepoOverviewCard } from "./RepoOverviewCard";
 import { CompactionCard } from "./CompactionCard";
 import { PackFilesCard } from "./PackFilesCard";
+import { DefaultBranchCard } from "./DefaultBranchCard";
 import { RefsCard } from "./RefsCard";
 import { DebugToolsCard } from "./DebugToolsCard";
 import { DangerZoneCard } from "./DangerZoneCard";
@@ -41,6 +42,7 @@ export function RepoAdminIsland(props: RepoAdminProps) {
     removePack,
     checkOid,
     dumpState,
+    setDefaultBranch,
     purgeRepo,
   } = useRepoAdminActions(owner, repo);
 
@@ -69,6 +71,13 @@ export function RepoAdminIsland(props: RepoAdminProps) {
         head={head}
         branchCount={branchCount}
         tagCount={tagCount}
+      />
+
+      <DefaultBranchCard
+        head={head}
+        refs={refs}
+        pending={pending}
+        setDefaultBranch={setDefaultBranch}
       />
 
       <CompactionCard
