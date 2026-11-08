@@ -9,17 +9,10 @@
   "workers_dev": false,
   "routes": [
     {
-      "pattern": "git-on-cloudflare.com",
-      "custom_domain": true
-    },
-    {
-      "pattern": "git.limic.dev",
+      "pattern": "git.rwdr0.me",
       "custom_domain": true
     }
   ],
-  "limits": {
-    "cpu_ms": 300000
-  },
   "durable_objects": {
     "bindings": [
       {
@@ -51,14 +44,14 @@
   "kv_namespaces": [
     {
       "binding": "ROUTES",
-      "id": "4e471bad6c5e44ceb91c4adf5559cb44"
+      "id": "9829757c9f7741b1a8ba9a1bebf0b8f0"
     }
   ],
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "git-on-cloudflare",
-      "database_id": "1fd98d8b-92b8-4a12-852a-e218ce362149",
+      "database_id": "41848a13-5f84-46e6-bb06-a194a06711d7",
       "migrations_dir": "drizzle/d1"
     }
   ],
