@@ -4,7 +4,7 @@ import { isValidSlug, RESERVED_SLUGS, validateSlugForRoute } from "@/shared/slug
 
 describe("isValidSlug", () => {
   it("accepts simple lowercase ASCII slugs", () => {
-    expect(isValidSlug("rachel")).toBe(true);
+    expect(isValidSlug("alice")).toBe(true);
     expect(isValidSlug("git-on-cloudflare")).toBe(true);
     expect(isValidSlug("a")).toBe(true);
     expect(isValidSlug("a1")).toBe(true);

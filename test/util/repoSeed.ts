@@ -30,7 +30,7 @@ export type SeedRepoArgs = {
   namespaceId?: string;
   repositoryId?: string;
   // Logical inputs.
-  tesseraSub?: string;
+  oidcSub?: string;
   namespaceSlug: string;
   repoSlug: string;
   visibility?: "public" | "private";
@@ -60,7 +60,7 @@ export async function seedRepo(env: Env, args: SeedRepoArgs): Promise<SeededRepo
   const userId = args.userId ?? newPrefixedId("user");
   await insertUserIfNew(db, {
     id: userId,
-    tesseraSub: args.tesseraSub ?? `seed-${userId}`,
+    oidcSub: args.oidcSub ?? `seed-${userId}`,
     createdAt: now,
   });
 

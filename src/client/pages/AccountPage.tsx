@@ -66,7 +66,7 @@ export function AccountPage({
           <EmptyState
             icon={<ShieldCheck className="h-5 w-5 text-zinc-400" aria-hidden="true" />}
             title="No namespace yet"
-            detail="Sign in once with a unique tessera username to claim a namespace."
+            detail="A namespace is claimed from your username or email on sign-in. Sign out and back in to retry."
           />
         ) : (
           <div className="flex flex-wrap gap-2">

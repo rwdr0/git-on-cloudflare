@@ -1,14 +1,12 @@
 # git-on-cloudflare
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/zllovesuki/git-on-cloudflare)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/rwdr0/git-on-cloudflare)
 
 **A Git Smart HTTP v2 server running entirely on Cloudflare Workers** — no VMs, no containers, just Durable Objects and R2.
 
 Host unlimited private Git repositories at the edge with <50ms response times globally. Full Git compatibility, modern web UI, and usage-based pricing that actually makes sense.
 
 > **Upgrade Notice:** The streaming-push closure release removed all legacy receive paths and rollback machinery. If upgrading from a pre-streaming deployment, you **must** first deploy and validate the cutover release (commit `98ad7dd`) before deploying the current version. See `MIGRATION-STREAMING-PUSH.md` for the required deployment sequence.
-
-> **tessera Ownership Upgrade Notice:** Legacy owner-token authentication has also been replaced by tessera browser sessions, D1-backed repository ownership, and personal access tokens. If upgrading an existing fork or self-hosted deployment from before the tessera migration, follow `MIGRATION-TESSERA-OIDC.md` before deploying latest `main`.
 
 ## Key Features
 
@@ -25,7 +23,7 @@ Host unlimited private Git repositories at the edge with <50ms response times gl
 
 ```bash
 # Clone the project
-git clone https://github.com/zllovesuki/git-on-cloudflare
+git clone https://github.com/rwdr0/git-on-cloudflare
 cd git-on-cloudflare
 npm install
 
@@ -65,7 +63,7 @@ This is a complete Git Smart HTTP v2 server built on Cloudflare's edge primitive
 
 - Complete Git pack protocol v2 with `ls-refs` and `fetch` commands
 - Streaming receive writes packs directly to R2 with atomic metadata commit
-- Tessera OIDC browser sessions and personal access tokens for Git pushes
+- OIDC browser sessions and personal access tokens for Git pushes
 - Modern web UI with Tailwind CSS v4, React page components, and worker-side SSR
 - SQLite-backed metadata inside Durable Objects using `drizzle-orm/durable-sqlite`
 - Structured JSON logging with `LOG_LEVEL` (debug/info/warn/error)
@@ -76,9 +74,9 @@ This is a complete Git Smart HTTP v2 server built on Cloudflare's edge primitive
 # Configure Cloudflare account
 wrangler login
 
-# Set session and tessera OIDC secrets
+# Set session and OIDC secrets
 wrangler secret put SESSION_SECRET
-wrangler secret put TESSERA_OIDC_CLIENT_SECRET
+wrangler secret put OIDC_CLIENT_SECRET
 
 # Deploy to Workers
 npm run deploy
@@ -86,11 +84,11 @@ npm run deploy
 
 Your Git server will deploy to your configured route or to `*.workers.dev`, depending on your Wrangler configuration. Push repos, browse code, and manage account tokens from the edge.
 
-> **Upgrading an existing deployment?** Read `MIGRATION-STREAMING-PUSH.md` first if you are pre-streaming, then `MIGRATION-TESSERA-OIDC.md` if you are crossing the tessera ownership migration.
+> **Upgrading an existing deployment?** Read `MIGRATION-STREAMING-PUSH.md` first if you are pre-streaming,.
 
 ## Authentication
 
-Authentication uses tessera OIDC for browser sessions and goc personal access tokens for Git over HTTP Basic.
+Authentication uses OIDC (a Cloudflare Access SaaS app in production) for browser sessions and goc personal access tokens for Git over HTTP Basic.
 
 ```bash
 # Development
@@ -98,7 +96,7 @@ cp .dev.vars.example .dev.vars
 
 # Production
 wrangler secret put SESSION_SECRET
-wrangler secret put TESSERA_OIDC_CLIENT_SECRET
+wrangler secret put OIDC_CLIENT_SECRET
 ```
 
 - Public repos can be cloned and browsed anonymously when present in the route cache.
@@ -109,14 +107,14 @@ wrangler secret put TESSERA_OIDC_CLIENT_SECRET
 > [!TIP]
 > For local `vite dev` testing, you may want to configure Git credentials up front instead of waiting for an interactive prompt. Miniflare currently has a bug where some backend `401 Unauthorized` responses can surface as a `500`, which prevents Git from prompting as it normally would against a deployed Worker.
 >
-> For example, if your namespace is `rachel` and your PAT is `goc_abcd1234_secret`, you can send the `Authorization` header explicitly:
+> For example, if your namespace is `alice` and your PAT is `goc_abcd1234_secret`, you can send the `Authorization` header explicitly:
 >
 > ```bash
-> git -c http.extraHeader='Authorization: Basic <base64(rachel:goc_abcd1234_secret)>' \
->   push http://127.0.0.1:5173/rachel/my-repo HEAD:refs/heads/main
+> git -c http.extraHeader='Authorization: Basic <base64(alice:goc_abcd1234_secret)>' \
+>   push http://127.0.0.1:5173/alice/my-repo HEAD:refs/heads/main
 > ```
 
-Admin endpoints for compaction and repository management require a signed-in tessera session with namespace membership. An admin dashboard is available at `/:owner/:repo/admin`.
+Admin endpoints for compaction and repository management require a signed-in browser session with namespace membership. An admin dashboard is available at `/:owner/:repo/admin`.
 
 ## Configuration
 
@@ -126,9 +124,9 @@ Environment variables:
 REPO_DO_IDLE_MINUTES=30      # Cleanup idle repos after 30 min
 LOG_LEVEL=info               # debug|info|warn|error
 SESSION_SECRET=...           # Browser session sealing secret
-TESSERA_OIDC_ISSUER=...      # tessera issuer URL
-TESSERA_OIDC_CLIENT_ID=...   # tessera client id
-TESSERA_OIDC_CLIENT_SECRET=... # tessera client secret
+OIDC_ISSUER=...              # OIDC issuer URL
+OIDC_CLIENT_ID=...           # OIDC client id
+OIDC_CLIENT_SECRET=...       # OIDC client secret
 ```
 
 See `.dev.vars.example` and `wrangler.jsonc` for the complete configuration.
@@ -141,7 +139,6 @@ See `.dev.vars.example` and `wrangler.jsonc` for the complete configuration.
 - [Data Flows](docs/data-flows.md) - Push, fetch, and web UI flows
 - [Caching Strategy](docs/caching.md) - Two-tier caching implementation
 - [Streaming Push Migration Guide](MIGRATION-STREAMING-PUSH.md) - Required path for pre-streaming deployments
-- [tessera Ownership Migration Guide](MIGRATION-TESSERA-OIDC.md) - Required path for deployments crossing the legacy auth cutover
 
 ## Limitations
 

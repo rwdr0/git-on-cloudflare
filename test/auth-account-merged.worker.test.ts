@@ -19,9 +19,9 @@ beforeAll(async () => {
 beforeEach(() => {
   oidcTest.setProviderForTesting(
     {
-      issuer: env.TESSERA_OIDC_ISSUER,
-      clientId: env.TESSERA_OIDC_CLIENT_ID,
-      clientSecret: env.TESSERA_OIDC_CLIENT_SECRET,
+      issuer: env.OIDC_ISSUER,
+      clientId: env.OIDC_CLIENT_ID,
+      clientSecret: env.OIDC_CLIENT_SECRET,
     },
     fakeProvider({
       authorizationEndpoint: "https://auth.example.com/authorize",
@@ -38,7 +38,7 @@ afterEach(() => {
 
 async function signIn(sub: string, preferredUsername?: string): Promise<string> {
   const state = `state-${sub}`;
-  const cookie = await oidcTransactionCookieHeader(env.TESSERA_OIDC_CLIENT_SECRET, {
+  const cookie = await oidcTransactionCookieHeader(env.OIDC_CLIENT_SECRET, {
     state,
     nonce: "n",
     codeVerifier: "v",
@@ -68,7 +68,7 @@ async function signIn(sub: string, preferredUsername?: string): Promise<string> 
 
 describe("merged /auth/account hub", () => {
   it("renders identity, namespaces, repositories, and the tokens island on one page", async () => {
-    const token = await signIn("sub-merged-1", "merged-rachel");
+    const token = await signIn("sub-merged-1", "merged-alice");
     const res = await workerExports.default.fetch("https://example.com/auth/account", {
       headers: { Cookie: sessionCookieHeader(token) },
     });
@@ -76,7 +76,7 @@ describe("merged /auth/account hub", () => {
     const html = await res.text();
 
     // Identity moment renders the namespace handle, not "Your account".
-    expect(html).toContain("@merged-rachel");
+    expect(html).toContain("@merged-alice");
     expect(html).toContain("Identity");
     expect(html).not.toContain("Your account");
 

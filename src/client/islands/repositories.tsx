@@ -320,7 +320,7 @@ function CreateForm({ primaryNamespaceSlug, onCancel, onSubmit }: CreateFormProp
           type="text"
           value={namespaceSlug}
           onChange={(event) => setNamespaceSlug(event.target.value)}
-          placeholder={primaryNamespaceSlug ?? "rachel"}
+          placeholder={primaryNamespaceSlug ?? "your-namespace"}
           helperText="The namespace to create under (your handle by default)."
           required
         />

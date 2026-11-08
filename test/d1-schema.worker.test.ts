@@ -8,7 +8,7 @@ import {
   findNamespaceBySlug,
   findPatByPrefix,
   findRepositoryByDoName,
-  findUserByTesseraSub,
+  findUserByOidcSub,
   insertMembershipIfMissing,
   insertPatWithGrants,
   insertRepositoryIfNew,
@@ -27,21 +27,21 @@ beforeAll(async () => {
 });
 
 describe("D1 schema + DAL round-trips", () => {
-  it("inserts a user and reads it back by tessera_sub", async () => {
+  it("inserts a user and reads it back by oidc_sub", async () => {
     const db = createDb(env.DB);
     const now = Date.now();
     const inserted = await insertUserIfNew(db, {
       id: "user-1",
-      tesseraSub: "sub-1",
+      oidcSub: "sub-1",
       createdAt: now,
     });
     expect(inserted?.id).toBe("user-1");
-    const found = await findUserByTesseraSub(db, "sub-1");
+    const found = await findUserByOidcSub(db, "sub-1");
     expect(found?.id).toBe("user-1");
-    // Insert with same `tessera_sub` is a no-op (returns undefined).
+    // Insert with same `oidc_sub` is a no-op (returns undefined).
     const dup = await insertUserIfNew(db, {
       id: "user-1-dup",
-      tesseraSub: "sub-1",
+      oidcSub: "sub-1",
       createdAt: now + 1,
     });
     expect(dup).toBeUndefined();
@@ -50,7 +50,7 @@ describe("D1 schema + DAL round-trips", () => {
   it("claims a namespace then refuses a duplicate slug", async () => {
     const db = createDb(env.DB);
     const now = Date.now();
-    await insertUserIfNew(db, { id: "user-ns", tesseraSub: "sub-ns", createdAt: now });
+    await insertUserIfNew(db, { id: "user-ns", oidcSub: "sub-ns", createdAt: now });
     const claimed = await claimNamespace(db, {
       id: "ns-1",
       slug: "alice",
@@ -71,10 +71,10 @@ describe("D1 schema + DAL round-trips", () => {
   it("inserts membership, lists namespaces for user, then repository listing", async () => {
     const db = createDb(env.DB);
     const now = Date.now();
-    await insertUserIfNew(db, { id: "user-r", tesseraSub: "sub-r", createdAt: now });
+    await insertUserIfNew(db, { id: "user-r", oidcSub: "sub-r", createdAt: now });
     await claimNamespace(db, {
       id: "ns-r",
-      slug: "rachel",
+      slug: "bob",
       createdBy: "user-r",
       createdAt: now,
     });
@@ -83,13 +83,13 @@ describe("D1 schema + DAL round-trips", () => {
       userId: "user-r",
       createdAt: now,
     });
-    expect((await listNamespacesForUser(db, "user-r")).map((n) => n.slug)).toEqual(["rachel"]);
+    expect((await listNamespacesForUser(db, "user-r")).map((n) => n.slug)).toEqual(["bob"]);
     const created = await insertRepositoryIfNew(db, {
       id: "repo-1",
       namespaceId: "ns-r",
       createdBy: "user-r",
       slug: "site",
-      doName: "rachel/site",
+      doName: "bob/site",
       visibility: "public",
       createdAt: now,
       updatedAt: now,
@@ -101,19 +101,19 @@ describe("D1 schema + DAL round-trips", () => {
       namespaceId: "ns-r",
       createdBy: "user-r",
       slug: "site",
-      doName: "rachel/site",
+      doName: "bob/site",
       visibility: "public",
       createdAt: now + 1,
       updatedAt: now + 1,
     });
     expect(replay).toBeUndefined();
-    expect((await findRepositoryByDoName(db, "rachel/site"))?.id).toBe("repo-1");
+    expect((await findRepositoryByDoName(db, "bob/site"))?.id).toBe("repo-1");
     const createdLater = await insertRepositoryIfNew(db, {
       id: "repo-2",
       namespaceId: "ns-r",
       createdBy: "user-r",
       slug: "api",
-      doName: "rachel/api",
+      doName: "bob/api",
       visibility: "public",
       createdAt: now + 2,
       updatedAt: now + 2,
@@ -121,7 +121,7 @@ describe("D1 schema + DAL round-trips", () => {
     expect(createdLater?.id).toBe("repo-2");
     const list = await listRepositoriesForUser(db, "user-r");
     expect(list.map((entry) => entry.repository.slug)).toEqual(["api", "site"]);
-    expect(list[0]?.namespace.slug).toBe("rachel");
+    expect(list[0]?.namespace.slug).toBe("bob");
     const namespaceList = await listRepositoriesForNamespace(db, "ns-r", null);
     expect(namespaceList.map((entry) => entry.slug)).toEqual(["api", "site"]);
   });
@@ -129,7 +129,7 @@ describe("D1 schema + DAL round-trips", () => {
   it("inserts a PAT with grants and revokes it via the result-union DAL", async () => {
     const db = createDb(env.DB);
     const now = Date.now();
-    await insertUserIfNew(db, { id: "user-p", tesseraSub: "sub-p", createdAt: now });
+    await insertUserIfNew(db, { id: "user-p", oidcSub: "sub-p", createdAt: now });
     await claimNamespace(db, {
       id: "ns-p",
       slug: "patowner",

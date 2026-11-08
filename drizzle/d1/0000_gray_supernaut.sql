@@ -1,10 +1,10 @@
 CREATE TABLE `users` (
 	`id` text PRIMARY KEY NOT NULL,
-	`tessera_sub` text NOT NULL,
+	`oidc_sub` text NOT NULL,
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `users_tessera_sub_unique` ON `users` (`tessera_sub`);--> statement-breakpoint
+CREATE UNIQUE INDEX `users_oidc_sub_unique` ON `users` (`oidc_sub`);--> statement-breakpoint
 CREATE TABLE `namespaces` (
 	`id` text PRIMARY KEY NOT NULL,
 	`slug` text NOT NULL,

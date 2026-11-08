@@ -1,12 +1,12 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-// Global user identity. `tessera_sub` is the verified `sub` claim from
-// tessera; it is opaque, stable, and is the only thing we trust as identity.
-// `preferred_username` from the ID token is treated as a slug candidate at
-// signup and is not stored here.
+// Global user identity. `oidc_sub` is the verified `sub` claim from the OIDC
+// provider; it is opaque, stable, and is the only thing we trust as identity.
+// `preferred_username` (or the email local part) from the ID token is treated
+// as a slug candidate at sign-in and is not stored here.
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
-  tesseraSub: text("tessera_sub").notNull().unique(),
+  oidcSub: text("oidc_sub").notNull().unique(),
   createdAt: integer("created_at").notNull(),
 });
 

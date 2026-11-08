@@ -20,9 +20,9 @@ beforeAll(async () => {
 beforeEach(() => {
   oidcTest.setProviderForTesting(
     {
-      issuer: env.TESSERA_OIDC_ISSUER,
-      clientId: env.TESSERA_OIDC_CLIENT_ID,
-      clientSecret: env.TESSERA_OIDC_CLIENT_SECRET,
+      issuer: env.OIDC_ISSUER,
+      clientId: env.OIDC_CLIENT_ID,
+      clientSecret: env.OIDC_CLIENT_SECRET,
     },
     fakeProvider({
       authorizationEndpoint: "https://auth.example.com/authorize",
@@ -39,7 +39,7 @@ afterEach(() => {
 
 async function signIn(sub: string, preferredUsername?: string): Promise<string> {
   const state = `state-${sub}`;
-  const cookie = await oidcTransactionCookieHeader(env.TESSERA_OIDC_CLIENT_SECRET, {
+  const cookie = await oidcTransactionCookieHeader(env.OIDC_CLIENT_SECRET, {
     state,
     nonce: "n",
     codeVerifier: "v",
@@ -69,13 +69,13 @@ async function signIn(sub: string, preferredUsername?: string): Promise<string> 
 
 describe("session lifecycle", () => {
   it("issues a session cookie that authorizes /auth/account", async () => {
-    const token = await signIn("sub-session-1", "session-rachel");
+    const token = await signIn("sub-session-1", "session-alice");
     const res = await workerExports.default.fetch("https://example.com/auth/account", {
       headers: { Cookie: sessionCookieHeader(token) },
     });
     expect(res.status).toBe(200);
     const html = await res.text();
-    expect(html).toContain("@session-rachel");
+    expect(html).toContain("@session-alice");
   });
 
   it("/auth/account redirects to /auth when no cookie is present", async () => {

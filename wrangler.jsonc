@@ -92,9 +92,9 @@
     "LOG_LEVEL": "info",
     // OIDC issuer (production): a Cloudflare Access SaaS OIDC app on the rwdr0 Zero Trust team.
     // Override via .dev.vars for local dev.
-    "TESSERA_OIDC_ISSUER": "https://rwdr0.cloudflareaccess.com/cdn-cgi/access/sso/oidc/a6383a9dc1d334d57dec22687d1396b2f394beb57ea81620b7e95f3333f0e94b",
+    "OIDC_ISSUER": "https://rwdr0.cloudflareaccess.com/cdn-cgi/access/sso/oidc/a6383a9dc1d334d57dec22687d1396b2f394beb57ea81620b7e95f3333f0e94b",
     // The client id is public (it appears in every authorize URL), so it lives here.
-    // The client secret is a real secret and must be set with `wrangler secret put TESSERA_OIDC_CLIENT_SECRET`.
-    "TESSERA_OIDC_CLIENT_ID": "a6383a9dc1d334d57dec22687d1396b2f394beb57ea81620b7e95f3333f0e94b"
+    // The client secret is a real secret and must be set with `wrangler secret put OIDC_CLIENT_SECRET`.
+    "OIDC_CLIENT_ID": "a6383a9dc1d334d57dec22687d1396b2f394beb57ea81620b7e95f3333f0e94b"
   }
 }

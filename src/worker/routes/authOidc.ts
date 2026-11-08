@@ -1,9 +1,10 @@
 import { validateSlugForRoute } from "@/shared/slugs";
 import {
   claimNamespace,
-  findUserByTesseraSub,
+  findUserByOidcSub,
   insertMembershipIfMissing,
   insertUserIfNew,
+  listNamespacesForUser,
 } from "@/worker/db/d1/dal";
 import {
   clearOidcTransactionCookie,
@@ -23,6 +24,7 @@ import {
   generateState,
   loadOidcConfig,
   verifyIdTokenClaims,
+  type VerifiedIdToken,
 } from "@/worker/auth/oidc";
 import { sameOriginViolation } from "@/worker/auth/origin";
 import {
@@ -36,6 +38,23 @@ import {
 import type { AppRouter } from "./hono";
 import { renderUiDocumentResponse } from "./uiResponse";
 import { errorRedirect, safeRedirect } from "./authShared";
+
+// Returns the first namespace slug candidate from a verified ID token that
+// passes route slug validation, or null when none does. Order matters:
+// `preferred_username` wins when the provider sends a valid one; otherwise the
+// local part of `email` is used (Cloudflare Access sends only `email`, so
+// "alice@example.com" becomes "alice"). A `preferred_username` that is itself
+// an email address fails slug validation and falls through to the email.
+function pickNamespaceSlugCandidate(verified: VerifiedIdToken): string | null {
+  const emailLocalPart = verified.email?.split("@")[0];
+  const rawCandidates = [verified.preferredUsername, emailLocalPart];
+  for (const raw of rawCandidates) {
+    if (!raw) continue;
+    const validation = validateSlugForRoute(raw.toLowerCase());
+    if (validation.ok) return validation.slug;
+  }
+  return null;
+}
 
 export function registerAuthOidcRoutes(router: AppRouter) {
   // GET /auth: anonymous sees the sign-in page; signed-in goes to account.
@@ -183,9 +202,10 @@ export function registerAuthOidcRoutes(router: AppRouter) {
       return errorRedirect(c, "session_create_failed");
     }
 
-    // First-login race-safe write model:
+    // Race-safe sign-in write model:
     //   1. Insert user; ON CONFLICT means existing row.
-    //   2. If new + valid pref-name, attempt namespace claim; can lose race.
+    //   2. If the user has no namespace yet and the ID token yields a valid
+    //      slug candidate, attempt a namespace claim; can lose the race.
     //   3. If claim won, create membership.
     //   4. Always create a sealed local session cookie.
     //
@@ -197,7 +217,7 @@ export function registerAuthOidcRoutes(router: AppRouter) {
     const newUserId = generateUserId();
     const inserted = await insertUserIfNew(db, {
       id: newUserId,
-      tesseraSub: verified.verified.sub,
+      oidcSub: verified.verified.sub,
       createdAt: now,
     });
     let userId: string;
@@ -206,7 +226,7 @@ export function registerAuthOidcRoutes(router: AppRouter) {
       userId = inserted.id;
       wasNewUser = true;
     } else {
-      const existing = await findUserByTesseraSub(db, verified.verified.sub);
+      const existing = await findUserByOidcSub(db, verified.verified.sub);
       if (!existing) {
         log.error("oidc:callback-user-upsert-failed");
         clearOidcTransactionCookie(c);
@@ -215,13 +235,18 @@ export function registerAuthOidcRoutes(router: AppRouter) {
       userId = existing.id;
     }
 
+    // The claim is retried on every sign-in until the user has a namespace,
+    // not only on the first one. A user whose earlier sign-in yielded no
+    // usable candidate (or lost the race) gets another chance. A brand-new
+    // user cannot have memberships yet, so skip that lookup for them.
     let claimedNamespaceSlug: string | null = null;
-    if (wasNewUser && verified.verified.preferredUsername) {
-      const candidate = validateSlugForRoute(verified.verified.preferredUsername.toLowerCase());
-      if (candidate.ok) {
+    const hasNamespace = wasNewUser ? false : (await listNamespacesForUser(db, userId)).length > 0;
+    if (!hasNamespace) {
+      const candidateSlug = pickNamespaceSlugCandidate(verified.verified);
+      if (candidateSlug) {
         const claimed = await claimNamespace(db, {
           id: generateNamespaceId(),
-          slug: candidate.slug,
+          slug: candidateSlug,
           createdBy: userId,
           createdAt: now,
         });
@@ -233,8 +258,10 @@ export function registerAuthOidcRoutes(router: AppRouter) {
           });
           claimedNamespaceSlug = claimed.slug;
         } else {
-          log.info("oidc:callback-namespace-taken", { slug: candidate.slug });
+          log.info("oidc:callback-namespace-taken", { slug: candidateSlug });
         }
+      } else {
+        log.info("oidc:callback-no-namespace-candidate");
       }
     }
 

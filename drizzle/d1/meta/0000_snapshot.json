@@ -14,8 +14,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "tessera_sub": {
-          "name": "tessera_sub",
+        "oidc_sub": {
+          "name": "oidc_sub",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -30,9 +30,9 @@
         }
       },
       "indexes": {
-        "users_tessera_sub_unique": {
-          "name": "users_tessera_sub_unique",
-          "columns": ["tessera_sub"],
+        "users_oidc_sub_unique": {
+          "name": "users_oidc_sub_unique",
+          "columns": ["oidc_sub"],
           "isUnique": true
         }
       },

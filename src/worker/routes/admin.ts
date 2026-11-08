@@ -90,7 +90,7 @@ export function registerAdminRoutes(router: AppRouter) {
   router.post(`/:owner/:repo/admin/compact`, handleCompactionPost);
 
   // -------------------------------------------------------------------------
-  // Repo-scoped admin endpoints. Auth model: tessera session + namespace
+  // Repo-scoped admin endpoints. Auth model: browser session + namespace
   // membership, plus same-origin for mutating verbs (`requireRepoAdmin`
   // calls `sameOriginViolation` itself). Git credentials must NOT authorize
   // these routes.

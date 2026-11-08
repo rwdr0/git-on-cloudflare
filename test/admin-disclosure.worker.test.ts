@@ -21,7 +21,7 @@ async function makeOutsider(): Promise<string> {
   const namespaceId = newPrefixedId("ns");
   const slug = `out-${Math.random().toString(36).slice(2, 8)}`;
   const now = Date.now();
-  await insertUserIfNew(db, { id: userId, tesseraSub: `t-${userId}`, createdAt: now });
+  await insertUserIfNew(db, { id: userId, oidcSub: `t-${userId}`, createdAt: now });
   const claimed = await claimNamespace(db, {
     id: namespaceId,
     slug,

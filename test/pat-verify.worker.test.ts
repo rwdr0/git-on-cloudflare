@@ -20,15 +20,15 @@ beforeAll(async () => {
 
 const USER_ID = "user-pv";
 const NAMESPACE_ID = "ns-pv";
-const NAMESPACE_SLUG = "verify-rachel";
+const NAMESPACE_SLUG = "verify-alice";
 const REPO_ID = "repo-pv";
 const REPO_SLUG = "site";
-const DO_NAME = "verify-rachel/site";
+const DO_NAME = "verify-alice/site";
 
 beforeEach(async () => {
   const db = createDb(env.DB);
   const now = Date.now();
-  await insertUserIfNew(db, { id: USER_ID, tesseraSub: "sub-pv", createdAt: now });
+  await insertUserIfNew(db, { id: USER_ID, oidcSub: "sub-pv", createdAt: now });
   await claimNamespace(db, {
     id: NAMESPACE_ID,
     slug: NAMESPACE_SLUG,

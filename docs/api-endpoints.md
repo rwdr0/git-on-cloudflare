@@ -110,7 +110,7 @@ git push https://owner:goc_abcd1234_secret@your-domain.com/owner/repo main
 ### Web UI
 
 - **`GET /auth`**  
-  Tessera sign-in/account entry surface
+  Sign-in/account entry surface
 
 - **`GET /auth/account`**  
   Signed-in account page for namespaces, repositories, and personal access tokens
@@ -134,7 +134,7 @@ git push https://owner:goc_abcd1234_secret@your-domain.com/owner/repo main
 
 ## Admin Endpoints
 
-Admin endpoints require a tessera-backed browser session and namespace membership.
+Admin endpoints require a signed-in browser session and namespace membership.
 
 ### Admin UI
 

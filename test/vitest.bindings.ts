@@ -16,9 +16,9 @@ export const BASE_TEST_BINDINGS = {
   // `__test.setProviderForTesting`; tests that exercise discovery failure
   // rely on this issuer being unreachable. A loopback URL with port 65535
   // keeps the `loadOidcConfig` policy happy (loopback HTTP is allowed)
-  // without ever reaching whatever tessera dev instance the developer might
+  // without ever reaching whatever OIDC provider the developer might
   // have running locally.
-  TESSERA_OIDC_ISSUER: "http://127.0.0.1:65535",
-  TESSERA_OIDC_CLIENT_ID: "test-goc",
-  TESSERA_OIDC_CLIENT_SECRET: "test-goc-secret",
+  OIDC_ISSUER: "http://127.0.0.1:65535",
+  OIDC_CLIENT_ID: "test-goc",
+  OIDC_CLIENT_SECRET: "test-goc-secret",
 } as const;

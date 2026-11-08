@@ -26,9 +26,9 @@ describe("/auth/start", () => {
     });
     oidcTest.setProviderForTesting(
       {
-        issuer: env.TESSERA_OIDC_ISSUER,
-        clientId: env.TESSERA_OIDC_CLIENT_ID,
-        clientSecret: env.TESSERA_OIDC_CLIENT_SECRET,
+        issuer: env.OIDC_ISSUER,
+        clientId: env.OIDC_CLIENT_ID,
+        clientSecret: env.OIDC_CLIENT_SECRET,
       },
       provider
     );

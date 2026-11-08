@@ -22,7 +22,7 @@ beforeAll(async () => {
 
 const USER_ID = "user-rr";
 const NAMESPACE_ID = "ns-rr";
-const NAMESPACE_SLUG = "rr-rachel";
+const NAMESPACE_SLUG = "rr-alice";
 const REPO_ID = "repo-rr";
 const REPO_SLUG = "site";
 const DO_NAME = "repo:uuid-rr";
@@ -30,7 +30,7 @@ const DO_NAME = "repo:uuid-rr";
 beforeEach(async () => {
   const db = createDb(env.DB);
   const now = Date.now();
-  await insertUserIfNew(db, { id: USER_ID, tesseraSub: "sub-rr", createdAt: now });
+  await insertUserIfNew(db, { id: USER_ID, oidcSub: "sub-rr", createdAt: now });
   await claimNamespace(db, {
     id: NAMESPACE_ID,
     slug: NAMESPACE_SLUG,

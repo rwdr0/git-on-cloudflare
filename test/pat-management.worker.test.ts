@@ -26,9 +26,9 @@ beforeAll(async () => {
 beforeEach(() => {
   oidcTest.setProviderForTesting(
     {
-      issuer: env.TESSERA_OIDC_ISSUER,
-      clientId: env.TESSERA_OIDC_CLIENT_ID,
-      clientSecret: env.TESSERA_OIDC_CLIENT_SECRET,
+      issuer: env.OIDC_ISSUER,
+      clientId: env.OIDC_CLIENT_ID,
+      clientSecret: env.OIDC_CLIENT_SECRET,
     },
     fakeProvider({
       authorizationEndpoint: "https://auth.example.com/authorize",
@@ -45,7 +45,7 @@ afterEach(() => {
 
 async function signInAndGetCookie(sub: string, preferredUsername: string): Promise<string> {
   const state = `state-${sub}`;
-  const cookie = await oidcTransactionCookieHeader(env.TESSERA_OIDC_CLIENT_SECRET, {
+  const cookie = await oidcTransactionCookieHeader(env.OIDC_CLIENT_SECRET, {
     state,
     nonce: "n",
     codeVerifier: "v",

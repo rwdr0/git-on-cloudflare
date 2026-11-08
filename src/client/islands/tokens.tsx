@@ -265,7 +265,7 @@ export function TokensIsland({
               type="text"
               value={namespaceSlug}
               onChange={(event) => setNamespaceSlug(event.target.value)}
-              placeholder={primaryNamespaceSlug ?? "rachel"}
+              placeholder={primaryNamespaceSlug ?? "your-namespace"}
               helperText="Defaults to your handle."
               required
             />
@@ -379,7 +379,7 @@ function ScopeSegmented({ scope, onChange }: ScopeSegmentedProps) {
         <span className="font-mono text-[11px] font-semibold uppercase tracking-widest">
           Namespace
         </span>
-        <span className="font-mono text-[11px] text-zinc-500">@rachel</span>
+        <span className="font-mono text-[11px] text-zinc-500">@namespace</span>
       </button>
       <button
         type="button"
@@ -389,7 +389,7 @@ function ScopeSegmented({ scope, onChange }: ScopeSegmentedProps) {
         aria-checked={scope === "repo"}
       >
         <span className="font-mono text-[11px] font-semibold uppercase tracking-widest">Repo</span>
-        <span className="font-mono text-[11px] text-zinc-500">rachel/site</span>
+        <span className="font-mono text-[11px] text-zinc-500">namespace/repo</span>
       </button>
     </div>
   );

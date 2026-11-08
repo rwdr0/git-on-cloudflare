@@ -1,13 +1,14 @@
 import * as oidc from "openid-client";
 import { z } from "zod";
 
-// tessera relying-party module. Mirrors flamemail's OIDC pattern:
+// OIDC relying-party module. Works with any standard OIDC provider; production
+// uses a Cloudflare Access SaaS OIDC app.
 //   - openid-client v6 owns discovery, PKCE, authorize URL, token exchange
-//   - Loopback HTTP issuer is allowed only for local dev (tessera-dev runs on
-//     http://localhost:5174). Production deployments use https://auth.limic.dev.
+//   - Loopback HTTP issuer is allowed only for local dev (for example a local
+//     provider on http://localhost:5174). Production issuers must be HTTPS.
 //   - The OIDC transaction (state, nonce, PKCE verifier, redirect) is encoded
 //     into a Hono signed `__Host-goc_oidc` cookie using
-//     a purpose-derived key from TESSERA_OIDC_CLIENT_SECRET, so we do not
+//     a purpose-derived key from OIDC_CLIENT_SECRET, so we do not
 //     need a separate cookie-signing secret. The payload is
 //     integrity-protected but not encrypted; it is short-lived, HttpOnly,
 //     Secure, and only used to complete the same browser's authorization-code
@@ -72,14 +73,14 @@ function normalizeIssuer(rawIssuer: string): string | null {
 }
 
 export function loadOidcConfig(env: Env): OidcConfigResult {
-  const rawIssuer = env.TESSERA_OIDC_ISSUER?.trim();
+  const rawIssuer = env.OIDC_ISSUER?.trim();
   if (!rawIssuer) return { ok: false, reason: "missing_issuer" };
   const issuer = normalizeIssuer(rawIssuer);
   if (!issuer) return { ok: false, reason: "insecure_issuer" };
   if (!isAllowedUrl(new URL(issuer))) return { ok: false, reason: "insecure_issuer" };
-  const clientId = env.TESSERA_OIDC_CLIENT_ID?.trim();
+  const clientId = env.OIDC_CLIENT_ID?.trim();
   if (!clientId) return { ok: false, reason: "missing_client_id" };
-  const clientSecret = env.TESSERA_OIDC_CLIENT_SECRET?.trim();
+  const clientSecret = env.OIDC_CLIENT_SECRET?.trim();
   if (!clientSecret) return { ok: false, reason: "missing_client_secret" };
   return { ok: true, config: { issuer, clientId, clientSecret } };
 }
@@ -306,6 +307,10 @@ export async function exchangeAuthorizationCode(
 export interface VerifiedIdToken {
   sub: string;
   preferredUsername?: string;
+  // Only used to derive a namespace slug candidate (its local part); never
+  // used as identity. Cloudflare Access sends `email` but no usable
+  // `preferred_username`, so this is the candidate that applies there.
+  email?: string;
 }
 
 export type VerifyError = "missing_sub";
@@ -315,16 +320,17 @@ export type VerifyResult =
   | { ok: false; reason: VerifyError };
 
 // goc trusts any verified `sub` (no operator allowlist; this is a multi-user
-// surface, not an admin tool). `preferred_username` is captured here as a
-// candidate slug; ownership is established through the namespace claim, not
-// through the claim value.
+// surface, not an admin tool). `preferred_username` and `email` are captured
+// here as candidate slug sources; ownership is established through the
+// namespace claim, not through the claim values.
 export function verifyIdTokenClaims(claims: oidc.IDToken): VerifyResult {
   if (typeof claims.sub !== "string" || claims.sub.length === 0) {
     return { ok: false, reason: "missing_sub" };
   }
   const preferredUsername =
     typeof claims.preferred_username === "string" ? claims.preferred_username : undefined;
-  return { ok: true, verified: { sub: claims.sub, preferredUsername } };
+  const email = typeof claims.email === "string" ? claims.email : undefined;
+  return { ok: true, verified: { sub: claims.sub, preferredUsername, email } };
 }
 
 export function buildAuthorizeUrl(

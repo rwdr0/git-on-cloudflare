@@ -36,7 +36,7 @@ async function createMember(
   const userId = newPrefixedId("user");
   const namespaceId = newPrefixedId("ns");
   const now = Date.now();
-  await insertUserIfNew(db, { id: userId, tesseraSub: `t-${userId}`, createdAt: now });
+  await insertUserIfNew(db, { id: userId, oidcSub: `t-${userId}`, createdAt: now });
   const claimed = await claimNamespace(db, {
     id: namespaceId,
     slug: namespaceSlug,

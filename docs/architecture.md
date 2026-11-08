@@ -13,7 +13,7 @@ The codebase is organized into focused modules with `index.ts` export files:
 - **`/do`** - Durable Objects
   - `repo/repoDO.ts` - Repository Durable Object (per-repo authority)
 - **`/auth`** - Authentication module
-  - Tessera OIDC, sealed browser sessions, and Git PAT verification
+  - OIDC sign-in, sealed browser sessions, and Git PAT verification
 - **`/cache`** - Two-tier caching system
   - UI layer caching (JSON responses)
   - Git object caching (immutable objects)
@@ -56,7 +56,7 @@ The codebase is organized into focused modules with `index.ts` export files:
 ### Ownership And Auth
 
 - D1 stores users, namespaces, memberships, repositories, PATs, and grants.
-- Tessera OIDC signs users into sealed local browser sessions.
+- OIDC sign-in (Cloudflare Access in production) signs users into sealed local browser sessions.
 - Git push uses HTTP Basic where the username matches the namespace slug and the password is a PAT with push access.
 
 ### Caching Layer (`src/cache/`)
